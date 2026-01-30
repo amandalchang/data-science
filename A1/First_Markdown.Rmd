@@ -1,0 +1,73 @@
+---
+title: "Assignment 1: RStudio Intro"
+author: "Amanda Chang"
+output: html_document
+---
+
+```{r load-packages, include=FALSE}
+library(dslabs)
+library(lterdatasampler)
+library(tidyverse)
+library(knitr)
+```
+## Exercise 3.1
+
+Create a brief essay about your interests and learning goals for this course, by doing the following: 
+
+##### Browse the internet to find a single graphic that uses data to tell a compelling story related to sustainability. Save the image to your local folder and add it to your R Markdown file, along with a source caption and a link to the site where you found the image
+
+![Source: [Visual Cinnamon by Nadieh Bremer](https://www.visualcinnamon.com/portfolio/highly-hazardous-pesticides/)](highly_hazardous_pesticides_infographic.png)
+
+##### Browse the internet again to find links to two sustainability-related data sets. Make a numbered list with your two links
+  1. [Global Potential Vegetation Dataset](https://sage.nelson.wisc.edu/data-and-models/datasets/global-potential-vegetation-dataset/)
+  2. [Lake Mead Water Level (Click on Lake Mead in Reservoir Data)](https://www.usbr.gov/uc/water/hydrodata/)
+  
+##### Skim the [Engineering for One Planet framework](https://engineeringforoneplanet.org/wp-content/uploads/EOP_Framework_2023.pdf). On pages 13-22, there are 93 detailed learning objectives. Choose 2-3 that you would personally like to focus on over the next 4-6 weeks and add them to a bulleted (not numbered) list    
+  * Recognize current eco-labelling systems and certificates (i.e., EPEAT, Energy Star) for sustainable
+production and consumption
+  * Recognize current environmental assessment research and gaps in research
+  
+##### Make a bulleted list with three or more sustainability-related questions or issues you are curious to investigate, analyze, and/or understand, utilizing data.  
+  * What is the primary cause of the draining of Lake Mead/the Colorado River? How much of that is due to over-allocation, and what groups are most responsible for it?
+  * Which type of plane is the greenest? What airlines fly those planes the most often?
+  * How does urban design (e.g. public transit, walkability, urban greening) influence sustainability outcomes?
+
+## Exercise 3.2
+##### a. Load the data.
+```{r}
+data(ntl_icecover)
+```
+##### b. What are the units of observation?  How many observations are there?  
+The units of observation is a particular frozen lake in Madison, WI in a particular year between 1853 and 2019, characterized by the name of the lake and the year of observation. There are 344 observations.
+```{r}
+length(ntl_icecover$lakeid)
+```
+
+##### c. In a new code chunk, print out the first 12 rows of the data set.
+```{r}
+head(ntl_icecover, 12)
+```
+##### d. Get a list of all variable names.  
+```{r}
+variables <- names(ntl_icecover)
+print(variables)
+```
+##### e. What's the class of the `lakeid` variable?  of the `ice_off` variable?   
+```{r}
+lakeid_class <- class(ntl_icecover$lakeid)
+iceoff_class <- class(ntl_icecover$ice_off)
+```
+The class of the lakeid variable is
+```{r echo=FALSE}
+print(lakeid_class)
+```
+The class of the ice_off variable is
+```{r echo=FALSE}
+print(iceoff_class)
+```
+
+##### f. List all of the unique entries in the `lakeid` variable.
+```{r}
+unique(ntl_icecover$lakeid)
+```
+The dataset only records entries of Lake Mendota and Lake Monona (and therefore has two unique entries), but the class is set up to handle an additional lake (Lake Wingra), which may have previously been part of the dataset. The documentation for this dataset also seems to reflect this, as it is listed as 431 rows but is only 344 rows in actuality.

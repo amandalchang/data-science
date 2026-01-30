@@ -1,0 +1,321 @@
+---
+title: "| Data Science With an Eye Towards Sustainability    \n| Activity A1: Intro to R, RStudio, and R Markdown\n"
+output:
+  bookdown::html_document2:
+    split_by: none
+    toc: FALSE
+    toc_float: FALSE
+
+---
+
+```{r setup, include=FALSE}
+library(dslabs)
+library(tidyverse)
+library(DT)
+library(lterdatasampler)
+```
+
+
+# Getting Started in RStudio
+
+
+As you might guess from the name, "Data Science" requires *data*.  Working with modern (large, messy) data sets requires statistical software.   We'll exclusively use **RStudio**.  Why?  
+
+- it's free    
+- it's open source (the code is free & anybody can contribute to it)
+- it has a huge online community (which is helpful for when you get stuck)
+- the huge online community develops open packages
+- it's one of the industry standards    
+- it can be used to create *reproducible* and lovely documents (In fact, the course materials that you're currently reading were constructed entirely within RStudio!)
+
+
+## Download R & RStudio
+
+To get started, take the following two steps *in the given order*.  Even if you already have R/RStudio, make sure to update to the most recent versions.     
+
+1. Download and install the R statistical software at <https://mirror.las.iastate.edu/CRAN/>    
+2. Download and install the FREE version of RStudio at <https://posit.co/download/rstudio-desktop/#download>
+    
+What's the difference between R and RStudio?  Mainly, RStudio requires R -- thus it does everything R does *and more*.  We will be using RStudio exclusively.  
+
+
+## A quick tour of RStudio
+
+Open RStudio!  You should see four panes, each serving a different purpose:    
+
+```{r fig-main,echo=FALSE,fig.cap="RStudio Interface"}
+knitr::include_graphics("images/RStudioImage.jpg")
+```
+
+This short [video tour of RStudio](http://www.youtube.com/embed/JfIo2Ua_oqQ/) summarizes some basic features of the *console*.  
+
+```{exercise, name="Warm Up"}
+Use RStudio as a simple calculator to do the following:
+  
+  1) Perform a simple calculation: calculate `90/3`.
+  2) RStudio has built-in *functions* to which we supply the necessary *arguments*:  `function(arguments)`.  Use the built-in function `sqrt` to calculate the square root of 25.
+  3) Use the built-in function `rep` to repeat the number "5" eight times.
+  4) Use the `seq` function to create the vector `(0, 3, 6, 9, 12)`.  (The video doesnt cover this!)
+  5) Create a new vector by concatenating three repetitions of the vector from the previous part. 
+
+```
+
+
+
+
+```{exercise, name="Assignment", label="assignment"}
+We often want to store our output for later use (why?).  The basic idea in RStudio:    
+  
+    `name <- output`
+  
+  Try the following syntax line by line.  NOTE:  RStudio ignores any content after the `#`.  Thus we use this to 'comment' and organize our code.    
+
+```
+
+```{r eval=FALSE}
+    #type square_3
+    square_3
+    
+    #calculate 3 squared
+    3^2    
+    
+    #store this as "square_3"
+    square_3 <- 3^2    
+    
+    #type square_3 again!
+    square_3
+    
+    #do some math with square_3
+    square_3 + 2
+```
+
+## Tidy Data
+
+Not only does "Data Science" require statistical software, it requires *DATA*!  Consider the Google definition:
+
+```{r echo=FALSE,fig.cap="A datum."}
+knitr::include_graphics("images/datum.png")
+```
+
+
+
+With this definition in mind, which of the following are examples of data?    
+
+- tables    
+- photos
+- videos
+- text / tweets 
+
+
+We'll mostly work with data that look like this:    
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+    data(gapminder)
+    gapminder12<-gapminder%>%
+      filter(year==2012)%>%
+      select(year,country,life_expectancy,fertility,population,continent)
+DT::datatable(gapminder12, options = list(pageLength = 6))
+```
+
+This isn't as restrictive as it seems.  How might we convert the signals, photos, videos, and text to a data table format?  
+    
+
+
+
+The data table above is in *tidy* format.  *Tidy* data tables have three key features:    
+
+1.  Each row represents a **unit of observation**.    
+2.  Each column represents a **variable** (ie. an attribute of the cases that can vary from case to case).  Each variable is one of two types:    
+  - **quantitative** = numerical    
+  - **categorical** =  discrete possibilities/categories    
+3.  Each entry contains a single data value; no analysis, summaries, footnotes, comments, etc., and only one value per cell    
+
+
+
+```{exercise, name="Units of Observation and Variables"}
+   
+   
+  a. What are the units of observation in the gapminder data?    
+  b. What are the variables?  Which are quantitative?  Which are categorical?    
+  c. Are these *tidy* data?    
+  
+```
+    
+
+```{exercise name="Tidy vs. Untidy"}
+Check out the following data.  Explain why they are untidy and how we can tidy them.    
+  
+  a. Data 1: Gapminder 2012 North America data    
+    
+              country   infant mortality life expectancy
+        -------------  ----------------- --------------- ------
+        Canada          i don't know*       81.6         *look up later      
+        Mexico                6.1           75.7
+        United States        13.1           79.0    
+                                          average=78.8           
+  
+  b. Data 2: Gapminder life expectancies by country and year  
+        
+                          country  1952  1957  1962
+        ------------ ------------ ----- ----- -----
+                Asia  Afghanistan  28.8  30.3  32.0
+                          Bahrain  50.9  53.8  56.9    
+              Africa      Algeria  43.0  45.7  48.3    
+
+```
+
+
+
+
+
+## Data Basics in RStudio
+                    
+For now, we'll focus on *tidy* data.  In a couple of weeks, you'll learn how to turn untidy data into tidy data.
+
+
+```{exercise, name="Importing Package Data"}
+The first step to working with data in RStudio is getting it in there!  How we do this depends on its format (eg: Excel spreadsheet, csv file, txt file) and storage locations (eg: online, within Wiki, desktop).  Luckily for us, the `gapminder` data are stored in the `dslabs` RStudio package.
+
+```
+
+```{r eval=FALSE}
+    #load the dslabs package
+    library(dslabs)
+    
+    #load the gapminder data
+    data("gapminder")
+    
+    #store this under a different name if you prefer
+    gm <- gapminder
+```
+
+```{exercise, name="Examining Data Structures"}
+Before we can analyze our data, we must understand its structure.  Try out the following functions.  For each, write a comment after `#` that describes its action.  
+
+```
+    
+```{r eval=FALSE}
+    #(what does View do?)
+    View(gm)  
+    
+    #(what does head do?)
+    head(gm)  
+    
+    #(what does glimpse do?)
+    glimpse(gm)  
+    
+    #(what does dim do?)
+    dim(gm)           
+    
+    #(what does names do?)
+    names(gm)         
+```
+
+
+```{exercise, name="Codebooks"}
+Data are also only useful if we know what they measure!  The `gapminder` data table is *tidy* -- it doesn't have any helpful notes.  Rather, information about the data is stored in a separate *codebook*.  Codebooks can be stored in many ways (eg: Google docs, word docs, etc).  Here the authors have made their codebook available in RStudio.  Check it out:
+
+```
+
+```{r eval=FALSE}
+    ?dslabs::gapminder
+```    
+
+  a. What does `infant_mortality` measure?
+  b. What are the units of `infant_mortality`?
+    
+
+```{exercise, name="Examining a Single Variable"}
+a. We might want to access and focus on a single variable.  To this end, we can use the `$` notation:
+  
+```
+
+```{r eval=FALSE}
+    gm$fertility
+    gm$continent
+```    
+
+    
+b. It's important to understand the format/class of each variable (quantitative, categorical, date, etc) in both its meaning and its structure within RStudio:
+    
+```{r eval=FALSE}
+    class(gm$fertility)
+    class(gm$continent)
+```    
+    
+c. If a variable is categorical (either in `character` or `factor` format), we can determine its `levels` / category labels:
+    
+```{r eval=FALSE}
+    levels(gm$continent)
+    levels(factor(gm$continent))
+```    
+
+        
+
+
+# R Markdown and Reproducible Research
+
+
+> **Reproducible research** is the idea that data analyses, and more generally, scientific claims, are published with their data and software code so that others may verify the findings and build upon them. - [Reproducible Research, Coursera](https://www.coursera.org/learn/reproducible-research)
+
+Useful Resources: 
+
+1. [R Markdown Quick Tour](http://rmarkdown.rstudio.com/authoring_quick_tour.html)  
+2. [R Markdown Cheatsheet](https://rstudio.github.io/cheatsheets/rmarkdown.pdf)
+
+Research often makes claims that are difficult to verify. A recent [study of published psychology articles](http://science.sciencemag.org/content/349/6251/aac4716) found that less than half of published claims could be reproduced. One of the most common reasons claims cannot be reproduced is confusion about data analysis. It may be unclear exactly how data was prepared and analyzed, or there may be a mistake in the analysis.
+
+In this course we will use an innovative format called R Markdown that dramatically increases the transparency of data analysis.  R Markdown interleaves data, R code, graphs, tables, and text, packaging them into an easily publishable format.
+
+To use R Markdown, you will write an R Markdown formatted file in RStudio and then ask RStudio to **knit** it into an HTML document (or occasionally a PDF or MS Word document). 
+
+ 
+
+```{exercise name="Deduce the R Markdown Format"}
+Look at this [Sample RMarkdown](http://www.statpower.net/Content/310/R%20Stuff/SampleMarkdown.Rmd) and the [HTML webpage](http://www.statpower.net/Content/310/R%20Stuff/SampleMarkdown.html) it creates.
+    
+a) How are bullets, italics, and section headers represented in the R Markdown file?
+b) How does R code appear in the R Markdown file?
+c) In the HTML webpage, do you see the R code, the output of the R code, or both?
+
+```
+
+
+
+Now take a look at the [R Markdown Cheatsheet](https://rstudio.github.io/cheatsheets/rmarkdown.pdf). Look up the R Markdown features from the previous question on the cheatsheet. There's a great deal more information there.
+
+
+# Practice
+
+Complete the following. If you get stuck along the way, refer to the R Markdown Cheatsheet linked above, search the web for answers, or ask for help!
+
+
+```{exercise name="Your First R Markdown File"}
+Create a new R Markdown exploring your initial interests and learning goals in this course:    
+
+a. Create a new file in RStudio (File -> New File -> R Markdown) called `First_Markdown`.    
+b. Make sure you can compile (Knit) the Markdown into a webpage.  
+c. Add a new line between `title` and `output` that reads: `author: Your Name`.
+d. Create a brief essay about your interests and learning goals for this course, by doing the following:    
+  * Browse the internet to find a single graphic that uses data to tell a compelling story related to sustainability. Save the image to your local folder and add it to your R Markdown file, along with a source caption and a link to the site where you found the image
+  * Browse the internet again to find links to two sustainability-related data sets. Make a numbered list with your two links
+  * Skim the [Engineering for One Planet framework](https://engineeringforoneplanet.org/wp-content/uploads/EOP_Framework_2023.pdf). On pages 13-22, there are 93 detailed learning objectives. Choose 2-3 that you would personally like to focus on over th next 4-6 weeks and add them to a bulleted (not numbered) list    
+  * Make a bulleted list with three or more sustainability-related questions or issues you are curious to investigate, analyze, and/or understand, utilizing data  
+e. Compile the document into an html file.
+
+```
+
+
+```{exercise}
+New data! There's a data set named `ntl_icecover` in the `lterdatasampler` package. Check out the codebook to understand what these data measure. Then add a second section (with a new section header) to your R Markdown file,
+and use code chunks and R commands to perform/answer the following tasks/questions:    
+  
+  a. Load the data.    
+  b. What are the units of observation?  How many observations are there?    
+  c. In a new code chunk, print out the first 12 rows of the data set.
+  d. Get a list of all variable names.  
+  e. What's the class of the `lakeid` variable?  of the `ice_off` variable?   
+  f. List all of the unique entries in the `lakeid` variable.
+  g. Compile the document into an html file.
+  h. Upload your completed html and R Markdown files to Canvas under A1.
+
+```

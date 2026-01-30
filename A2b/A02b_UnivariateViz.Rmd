@@ -1,0 +1,382 @@
+---
+title: "| Data Science With an Eye Towards Sustainability    \n| Activity A2b: Univariate Visualization\n"
+author: "INSERT STUDENT NAME HERE"
+output:
+  bookdown::html_document2:
+    split_by: none
+    toc: yes
+    toc_depth: 1
+
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+```
+
+# Data Visualization Workflow + `ggplot`
+
+There's no end to the number and type of visualizations you *could* make.  Thus the process can feel overwhelming.  [FlowingData](http://flowingdata.com/2017/01/24/one-dataset-visualized-25-ways/) makes good recommendations for data viz workflow:    
+
+- **Ask the data questions.**  Simple research questions will guide the types of visualizations that you should construct.    
+- **Start with the basics and work incrementally.** Before constructing complicated or multivariate or interactive graphics, start with simple visualizations.  An understanding of the simple patterns provides a foundation upon which to build more advanced analyses and visualizations.This incremental process works particularly well with the layered grammar of graphics in `ggplot`.
+- **Focus.**  Reporting a large number of visualizations can overwhelm the audience and obscure your conclusions.  Instead, pick out a focused yet comprehensive set of visualizations. [Here](http://flowingdata.com/2017/01/24/one-dataset-visualized-25-ways/) is an example of one dataset visualized 25 different ways, each with a different focus and interpretation, and what can happen if you let the data ramble on without a focus. 
+
+In this course we'll largely construct visualizations using the `ggplot` function in RStudio.  Though the `ggplot` learning curve can be steep, its "grammar" is intuitive and generalizable once mastered.  The `ggplot` plotting function is stored in the `ggplot2` package:
+
+
+```{r}
+library(ggplot2)
+```
+
+It is also part of the `tidyverse` package, so it gets automatically loaded when you load that package.
+
+The best way to learn about `ggplot` is to just play around. Focus on the *patterns* and *potential* of their application.  It will be helpful to have the [RStudio Data Visualization cheat sheet](https://rstudio.github.io/cheatsheets/data-visualization.pdf) handy as you complete this activity.
+
+
+
+## New York City Trees
+
+![](http://faculty.olin.edu/dshuman/DS/%E2%80%8Enyc_tree_sample.%E2%80%8E001.jpeg)
+
+The [NYC Tree Map](https://tree-map.nycgovparks.org/tree-map/) shows all of the tree manged by NYC Parks in the five boroughs of New York City. Much of the data behind these maps are from the [2015 Street Tree Census](https://data.cityofnewyork.us/Environment/2015-Street-Tree-Census-Tree-Data/uvpi-gqnh/data). The map allows you to zoom into different locations to see individual tree and features of that tree (diameter, tree type, etc.).
+
+The entire data file from the 2015 tree census is over 220Mb, but I have made a subset with fewer variables and using only the living trees. Download the file [here](http://faculty.olin.edu/dshuman/DS/nyc_living_trees.csv) and make sure it is saved in the same folder as your .Rmd file. We can then load the data as follows:
+
+```{r,cache=TRUE}
+nyc_trees<-read_csv("nyc_living_trees.csv",
+col_type = list(health = col_factor(), spc_common = col_factor(), borough = col_factor()))
+```
+
+``` {exercise}
+Before diving into any visualizations of these data, we first must understand its structure and contents.   
+  
+  a. What are the units of observation (cases) in this sample? 
+      Individual trees in NYC
+  b. Use RStudio functions to:    
+  - summarize the number of cases in `nyc_trees`
+```
+```{r}
+length(nyc_trees$tree_id)
+```
+  - examine the first cases of `nyc_trees`
+```{r}
+head(nyc_trees, 12)
+```
+  - list out the names of all variables in `nyc_trees` 
+```{r}
+variables <- names(nyc_trees)
+print(variables)
+```
+  c. What are the levels of the `health` and `borough` variables?
+```{r}
+levels(nyc_trees$health)
+levels(nyc_trees$borough)
+```
+
+  d. Check out the [codebook/data dictionary](http://faculty.olin.edu/dshuman/DS/StreetTreeCensus2015TreesDataDictionary20161102.pdf).  What does the variable `tree_dbh` capture? What are its units? Where it is measured?
+  
+The variable `tree_dbh` captures the diameter at breast height of the tree. This is in integer inches and is measured at 54" above the ground.
+
+We'll consider *univariate* visualizations of the `health` and `tree_dbh` variables.  
+  
+  a. What features would we like a visualization of the *categorical* `health` variable to capture?
+  
+  We might like to capture different health rankings, the number of trees in each ranking, and the overall health of trees in different boroughs.
+    
+  b. What features would we like a visualization of the *quantitative* `tree_dbh` variable to capture?
+  
+  We might like to capture the maximum and minimum dbh values or the number of trees of a particular dbh in different boroughs.
+
+# Categorical univariate visualization
+
+We begin by stating a clear research question:
+
+> Among the trees in our sample, how many fall into each of the three health classifications?    
+
+
+To answer the above research question, we can explore the categorical `health` variable.  A table provides a simple summary of the number of trees in each classification:    
+
+```{r}
+  table(nyc_trees$health)
+```
+    
+Because `health` is a categorical variable, a **bar chart** provides an appropriate visualization of this table.  In examining the bar chart, keep your eyes on the following.
+
+- **variability**: Are cases evenly spread out among the categories or are some categories more common than others?    
+
+  Good is way more common than the other categories.
+
+- **contextual implications**: In the context of your research, what do you learn from the bar chart?  How would you describe your findings to a broad audience?    
+
+  Almost all the trees in NYC are in fair or good health, indicating that NYC tree maintenance systems are working.
+
+```{exercise}
+Try out the code below that builds up from a simple to a customized bar chart. At each step determine how each piece of code contributes to the plot.    
+
+```
+    
+``` {r eval=FALSE}
+    #plot 1: set up a plotting frame (a blank canvas)
+    ggplot(nyc_trees, aes(x=health))
+    
+    #plot 2: what changed / how did we change it?
+    #added a bar chart for the number of trees in each health category
+    ggplot(nyc_trees, aes(x=health)) + 
+        geom_bar()
+    
+    #plot 3: what changed / how did we change it?
+    #labeled the axes with labs
+    ggplot(nyc_trees, aes(x=health)) + 
+        geom_bar() +
+        labs(x="Health Status", y="Number of Trees")
+
+    #plot 4: what changed / how did we change it?
+    #Made the bar outline purple with color="purple"
+    ggplot(nyc_trees, aes(x=health)) + 
+        geom_bar(color="purple") +
+        labs(x="Health Status", y="Number of Trees")
+
+    #plot 5: what changed / how did we change it?
+    #Filled the bar with purple with fill="purple"
+    ggplot(nyc_trees, aes(x=health)) + 
+        geom_bar(fill="purple") +
+        labs(x="Health Status", y="Number of Trees")
+```
+
+
+
+```{exercise}
+Summarize the visualization: what did you learn about the distribution of the `health` variable?    
+```
+Almost all the trees are in Good health, with a couple in Fair and very few in Poor.
+
+```{exercise}
+What percent of trees in the sample have a health status of `Good`? 
+```
+
+```{r}
+528850/(96504+528850+26818)
+```
+
+
+# Quantitative univariate visualization
+
+To motivate quantitative visualizations, consider a second research question 
+
+> Among the trees in our sample, what's the range of diameters?  What's the typical diameter?  The largest/smallest?    
+
+
+We can answer the above research question by exploring the *quantitative* `tree_dbh` variable.  Quantitative variables require different summary tools than categorical variables. We’ll explore two methods for graphing quantitative variables: histograms and density plots.  Each of these has strengths/weaknesses in helping us visualize the distribution of observed values.  
+
+In their examination, keep your eyes on the following.
+
+- **center**: Where's the center of the distribution?  What's a typical value of the variable?
+- **variability**: How spread out are the values?  A lot or a little? 
+- **shape**: How are values distributed along the observed range?  Is the distribution symmetric, right-skewed, left-skewed, bi-modal, or uniform (flat)?    
+- **outliers**: Are there any *outliers*, ie. values that are unusually large/small relative to the bulk of other values?    
+- **contextual implications**: Interpret these features in the context of your research.  How would you describe your findings to a broad audience?
+
+## Histograms
+
+Histograms are constructed by (1) dividing up the observed range of the variable into 'bins' of equal width; and (2) counting up the number of cases that fall into each bin.  
+
+```{exercise}
+Try out the code below.  At each step determine how each piece of code contributes to the plot.    
+
+```
+
+``` {r eval=FALSE}
+    #plot 1: set up a plotting frame
+    ggplot(nyc_trees, aes(x=tree_dbh))
+    
+    #plot 2: what changed / how did we change it?
+    #added histogram of number of trees on y and tree diameters on x
+    ggplot(nyc_trees, aes(x=tree_dbh)) +
+        geom_histogram()
+    
+    #plot 3: what changed / how did we change it?
+    #labeled the axes with labs()
+    ggplot(nyc_trees, aes(x=tree_dbh)) +
+        geom_histogram()+
+        labs(x="Tree Diameter (inches)", y="Number of Trees")
+    
+    #plot 4: what changed / how did we change it?
+    #gave the bars a white outline
+    ggplot(nyc_trees, aes(x=tree_dbh)) +
+        geom_histogram(color="white")+
+        labs(x="Tree Diameter (inches)", y="Number of Trees")
+
+    #plot 5: what changed / how did we change it?
+    #filled the bars white with fill="white"
+    ggplot(nyc_trees, aes(x=tree_dbh)) +
+        geom_histogram(fill="white")+
+        labs(x="Tree Diameter (inches)", y="Number of Trees")
+    
+    #plot 6: what changed / how did we change it?
+    #brought back white outline and defined a thinner binwidth of 1
+    ggplot(nyc_trees, aes(x=tree_dbh)) +
+        geom_histogram(color="white",binwidth=1)+
+        labs(x="Tree Diameter (inches)", y="Number of Trees")
+
+    #plot 7: what changed / how did we change it?
+    #increased the binwidth to 100
+    ggplot(nyc_trees, aes(x=tree_dbh)) +
+        geom_histogram(color="white",binwidth=100)+
+        labs(x="Tree Diameter (inches)", y="Number of Trees")
+        
+    #plot 8: what changed / how did we change it?
+    #decreased the binwidth to 5
+    ggplot(nyc_trees, aes(x=tree_dbh)) +
+        geom_histogram(color="white",binwidth=5)+
+        labs(x="Tree Diameter (inches)", y="Number of Trees")
+```
+
+Summarize the visualizations.    
+  
+  a. Describe the "goldilocks problem" in choosing a bin width that's not too wide and not too narrow, but just right.
+    A bin that is too wide will obscure relevant information, while a bin that is too narrow may include too much detail and make the overall pattern unclear.
+  b. What did you learn about the distribution of the `tree_dbh` variable?    
+    It is monomodal skewed left with a couple outliers.
+  c. Why does adding `color="white"` improve the visualization?
+    It puts an outline on the bar lines and separates them better.
+
+## Density plots
+
+
+**Density plots** are essentially smooth versions of the histogram.  Instead of sorting cases into discrete bins, the "density" of cases is calculated across the entire range of values.  The greater the number of cases, the greater the density!  The density is then scaled so that the area under the density curve **always equals 1** and the area under any fraction of the curve represents the fraction of cases that lie in that range.  
+
+```{exercise}
+Try the following code and assess what each line does.
+
+```
+
+``` {r eval=FALSE}
+    #plot 1: set up the plotting frame
+    ggplot(nyc_trees, aes(x=tree_dbh))
+    
+    #plot 2: what changed / how did we change it?
+    # We plotted density on the graph and it auto-labeled as density by adding
+    # geom_density()
+    ggplot(nyc_trees, aes(x=tree_dbh)) +
+        geom_density()
+    
+    #plot 3: what changed / how did we change it?
+    # We renamed the x axis to Tree Diameter (inches) by adding labs()
+    ggplot(nyc_trees, aes(x=tree_dbh)) +
+        geom_density() +
+        labs(x="Tree Diameter (inches)")
+    
+    #plot 4: what changed / how did we change it?
+    # We recolored the density line to red by adding a custom color option
+    ggplot(nyc_trees, aes(x=tree_dbh)) +
+        geom_density(color="red") +
+        labs(x="Tree Diameter (inches)")
+
+    #plot 5: what changed / how did we change it?
+    # We filled the density curve with red by using fill="red"
+    ggplot(nyc_trees, aes(x=tree_dbh)) +
+        geom_density(fill="red") +
+        labs(x="Tree Diameter (inches)")
+```
+
+```{exercise}
+The histogram and density plot both allow us to visualize the distribution of a quantitative variable.  What are the pros/cons of each?    
+```
+Histogram 
+
+- Pros: Simple, easy to read, good for representing discrete values.
+
+- Cons: can look choppy if the bin size is too small or over-smoothed if the bin size is too big
+
+Density plot
+
+- Pros: Emphasizes the overall shape of the plot, is easier to use as an overlay (since it's harder to fully obscure a continuous plot with another continuous plot than 2+ histograms overlayed)
+
+- Cons: Less easy to interpret (i.e. y-axis of density vs. # of trees), can give discrete values a false sense of continuity
+
+# Additional exercises
+
+No class will teach you everything you need to know about RStudio or programming in general. Thus, being able to find help online is an important skill.  To this end, some of the following exercises will require a little Googling and/or use of the visualization cheat sheet.    
+
+```{exercise}
+a. Make a bar chart of the number of trees in each borough. Make sure to label your axes.   
+b. Sort the bars in descending order of the number of trees (so that the borough with the most trees is farthest left on the x-axis and the borough with the fewest trees is farthest right on the x-axis). 
+c. Flip the bar chart so that each bar is horizontal and the x-axis shows the number of trees [hint: this should be just one extra line on top of your previous code]. 
+
+```
+
+``` {r}
+borough_trees <- count(nyc_trees, borough, sort=TRUE)
+
+ggplot(data=borough_trees, mapping=aes(x=reorder(borough, -n), n)) + 
+    geom_bar(stat="identity", fill="#1e90ff") +
+    labs(x="Borough", y="Number of Trees") +
+    coord_flip()
+```
+
+```{exercise}
+Make a single visualization that incorporates the following modifications to your density plot of tree diameter from above.  
+
+  - Add a title or caption    
+  - Add *transparency* to the fill color   
+  - Calculate the mean (ie. average) diameter and median diameter:
+
+```
+
+```{r eval=TRUE}
+  mean_diam <- mean(nyc_trees$tree_dbh)
+  median_diam <- median(nyc_trees$tree_dbh)
+```    
+
+  - Add two vertical lines to your plot: one representing the mean and the other representing the median. Use two different colors and/or line types   
+
+  - Change the limits of the x-axis to range from 0-80 inches
+  
+```{r}
+ggplot(nyc_trees, aes(x=tree_dbh)) +
+  geom_density(color="#F8766D", fill="#F8766D", alpha=0.7) +
+  labs(x="Tree Diameter (inches)", y="Density", title="Density of Tree Diameters in NYC") +
+  geom_vline(aes(xintercept=mean_diam), color="#1e90ff", linetype=1) +
+  annotate("text", x=(mean_diam+1.5), y=0.075, color="#1e90ff", label="Mean", angle=90) + 
+  geom_vline(aes(xintercept=median_diam), color="#00BFC4", linetype=2) +
+  annotate("text", x=(median_diam-1.5), y=0.075, color="#00BFC4", label="Median", angle=90) +
+  xlim(0,80)
+```
+
+```{exercise}
+Explain the output of the following code, relating it to your visualization from the previous exercise:   
+  
+```
+
+```{r}
+summary(nyc_trees$tree_dbh)
+```
+Summary returns statistical characteristics of the data, like what might be 
+found in a box plot. The dotted line in my visualization is the median, while
+the solid line is the mean. Summary tells us that the data is mostly
+concentrated around the median and mean values, with a few (or possibly even just
+one) outliers far above the third quartile. Essentially, it characterizes the 
+plot as being skewed left with a long tail to the right, which is exactly what you
+can see in my visualization.
+
+```{exercise}
+So far, all of our visualizations have been *univariate*; i.e., focusing on a single variable. We can start to answer more interesting questions with *bivariate* and *multivariate* tables and visualizations. 
+
+For example, let's contemplate the question, "how does the distribution of tree health status vary across the boroughs?"
+
+Make a two-way table that shows the total number of trees by borough (row) and health status (column). As a check, there should be 194,008 trees in Queens with a status of Good.
+
+Next class, we'll learn to make bivariate visualizations to answer questions like this one, as well as:  
+  
+- "How do tree diameter/tree health vary by tree type?"
+- "Which types of trees are more commonly found in which parts of the city?"
+- ...
+
+```
+
+```{r}
+borough_tree_health <- table(nyc_trees$borough, nyc_trees$health)
+borough_tree_health
+```
+
+
