@@ -232,7 +232,7 @@ We saw above that we can incorporate a new categorical variable into a visualiza
 ```
 
 a. Construct the following 4 bar plot visualizations.    
-    ```{r eval=FALSE}
+```{r eval=FALSE}
     #a stacked bar plot
     ggplot(energy_per_capita1, aes(x=year, fill=less_than_eighty_percent_fossil_fuels))+
       geom_bar()+
@@ -253,7 +253,7 @@ a. Construct the following 4 bar plot visualizations.
         geom_bar() +
         facet_wrap( ~less_than_eighty_percent_fossil_fuels)+
         labs(y="Number of Countries",fill="Fossil Fuel Contribution Below 80%")
-        ```    
+```    
 
 b. Name one pro and one con of using the "proportional bar plot" instead of one of the other three options.    
 
