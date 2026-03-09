@@ -1,6 +1,6 @@
 ---
 title: "| Introduction to Data Science    \n| Activity A3b: Multivariate Visualization I\n"
-author: "INSERT STUDENT NAME HERE"
+author: "Amanda Chang"
 output:
   bookdown::html_document2:
     split_by: none
@@ -12,6 +12,7 @@ output:
 ```{r setup,include=FALSE}
 knitr::opts_chunk$set(tidy = FALSE, message=FALSE,warning=FALSE)
 library(tidyverse)
+library(dplyr)
 ```
 
 
@@ -66,16 +67,23 @@ knitr::kable(
 )
 ```
 
-```{exercise, name="Explore the data"}
 1. What are the units of observation for each; i.e., what does one row correspond to in each of the three tables?
+
+- Table 1: A country in a particular year
+- Table 2: A country
+- Table 3: A country in a particular year using a specific type of energy source.
   
 2. What are the dimensions of each of the three tables? 
 
+Table 1 is 7 by 284, table 2 is 14 by 73, and table 3 is 5 by 852.
+
 3. How many countries are included in the data set?
+
+73 countries.
   
-4. Are there data for all four of the selected years for each of the included countries? 
-  
-```
+4. Are there data for all four of the selected years (1991, 2001, 2011, and 2021) for each of the included countries? 
+
+No, some do not include data, like the fossil fuel use of the UAE in 1991.
 
 \
 
@@ -88,43 +96,56 @@ Both `fossil_fuels_2001` and `fossil_fuels_2021` are quantitative, thus require 
 
 ```
 
-a. Which of the three tables do we want to use to make this plot? To answer this question, we want to think of the "one row per glyph" guiding rule of glyph-ready data. 
+a. Which of the three tables do we want to use to make this plot? To answer this question, we want to think of the "one row per glyph" guiding rule of glyph-ready data.
+
+Plotting table 2 would be useful to determine a relationship between countries above and below the line. 
 
 b. Make a scatterplot of `fossil_fuels_2001` vs `fossil_fuels_2021` with point glyphs:    
   
     ```{r eval=FALSE}
     # for all of these, you'll need to change the X in energy_per_capitaX to 1, 2, or 3
     #just a graphics frame
-    ggplot(energy_per_capitaX, aes(y=fossil_fuels_2021, x=fossil_fuels_2001))  # it doesn't matter whether you specify the y or x aesthetic first
+    ggplot(energy_per_capita2, aes(y=fossil_fuels_2021, x=fossil_fuels_2001))  # it doesn't matter whether you specify the y or x aesthetic first
    
     #add a layer with "point" glyphs
-    ggplot(energy_per_capitaX, aes(y=fossil_fuels_2021, x=fossil_fuels_2001)) + 
+    ggplot(energy_per_capita2, aes(y=fossil_fuels_2021, x=fossil_fuels_2001)) + 
         geom_point()
     
     #add a layer with a diagonal line along y=x
-    ggplot(energy_per_capitaX, aes(y=fossil_fuels_2021, x=fossil_fuels_2001)) + 
+    ggplot(energy_per_capita2, aes(y=fossil_fuels_2021, x=fossil_fuels_2001)) + 
         geom_point() +
         geom_abline(linewidth=.3,linetype=3) 
     ```    
-
 c. Summarize the relationship between fossil fuel energy consumption in 2001 and fossil fuel energy consumption in 2021. Be sure to comment on:    
-        - the strength of the relationship (weak/moderate/strong)    
-        - the direction of the relationship (positive/negative)    
+
+        - the strength of the relationship (weak/moderate/strong)
+        
+        - the direction of the relationship (positive/negative)   
+        
         - outliers: what countries deviate from the  trend?  
+
+See answer below E (the plot in E was used to answer C)
         
 d. Which points on the plot correspond to countries decreasing their per capita fossil fuel use over the 20-year period? Which correspond to countries increasing their per capita fossil fuel use over the 20-year period?
+
+Points on the plot below the fossil_fuels_2021=fossil_fuels_2001 line are decreasing their per capita fossil fuel use, while countries above the line are increasing their per capita fossil fuel use.
 
 e. It would be nice to know which countries these points correspond to! We can do that by replacing the points (`geom_point()`) with text labels (`geom_text()`):
 
     ```{r eval=FALSE}
     # Because we want the label to be different for each point, the `label=code` has to go inside of an `aes()`
-    ggplot(energy_per_capitaX, aes(y=fossil_fuels_2021, x=fossil_fuels_2001)) + 
+    ggplot(energy_per_capita2, aes(y=fossil_fuels_2021, x=fossil_fuels_2001)) + 
         geom_text(aes(label=code)) + 
         geom_abline(linewidth=.3,linetype=3) 
     ```  
 
 \
+c. There is a strong positive relationship between fossil fuel energy consumption in 2001 and consumption in 2021.
 
+```{r}
+filter(energy_per_capita2, code %in% c('LUX', 'SGP', 'ARE', 'OMN'))
+```
+The biggest deviators from the trend include LUX, SGP, ARE, and OMN, which correspond to Luxembourg, Oman, Singapore, and the UAE respectively. This is visible from the graph created in part E.
 
 # Visualizing Quantitative vs. Categorical Relationships
 
@@ -173,10 +194,16 @@ Let's try a similar strategy using histograms to illustrate the relationship bet
 a. Start with the default histogram:    
     ```{r eval=FALSE}
     ggplot(energy_per_capita_2021, aes(x=consumption_per_capita, fill=energy_source)) +  
-      geom_histogram(color="white") 
+      geom_histogram(color="white")
     ```
 b. That's not very helpful!  Separate the histograms into separate facets for each `energy_source` group.    
 
+    ```{r}
+    ggplot(energy_per_capita_2021, aes(x=consumption_per_capita, fill=energy_source)) +  
+      geom_histogram(color="white") +
+      facet_wrap(~energy_source)
+    ```
+    
 \
 
 **More Options**
@@ -257,8 +284,11 @@ a. Construct the following 4 bar plot visualizations.
 
 b. Name one pro and one con of using the "proportional bar plot" instead of one of the other three options.    
 
+It's very easy to tell what fraction of countries are consuming 80% less energy in 2021 than in 1991, but it's not clear how many countries the data is referring to.
+
 c. What's your favorite bar plot from part (a)?  Why?    
 
+Plot 2, the side-by-side bar plot, is my favorite. It's easy to compare the actual number of countries who are using 80% less energy in each year, which is information that is important to understanding the trend. In the first plot, because the countries not meeting the threshold are starting at different heights (as they are stacked on the blue bars) it's hard to compare their lengths. The graph instead emphasizes the fact that the researchers seemed to take fewer samples in 1991 than in the other years measured. The con in plot 3 is already mentioned above, and the last plot distances the years in such a way that the color coding becomes irrelevant and the heights of bars from the same year are more difficult to meaningfully compare than in plot 2.
 
 \
 
@@ -269,6 +299,19 @@ a. In 2021, which country consumed the least energy from fossil fuels, per capit
 
 b. Which country in the data set reduced total fossil fuel energy consumption per capita by the greatest percentage from 2001 to 2021? How much did that country reduce it by?
 ```
+
+```{r}
+# The country which consumed the least energy from fossil fuels per capita is Bangladesh
+fossil_fuel_consumption <- filter(energy_per_capita3, energy_source == 'fossil_fuels')
+slice_min(fossil_fuel_consumption, consumption_per_capita)
+```
+```{r}
+max_reduction_country <- slice_max(energy_per_capita2, fossil_fuels_2001/fossil_fuels_2021)
+print(max_reduction_country)
+max_reduction_country$fossil_fuels_2001/max_reduction_country$fossil_fuels_2021*100
+```
+The country with the greatest percentage reduction in fossil fuel usage per 
+capita from 2001 to 2021 is Denmark, who reduced it by 214.4%.
 
 \
 
@@ -283,10 +326,31 @@ b. Recreate both plots as closely as possible. Hint: start by thinking about the
 
 ```
 
+a. Plot 1 can technically answer both questions but is better suited to answer 
+the question of whether or not the overall energy consumption per capita has 
+decreased. Because fossil fuel consumption is placed on top of the renewable and 
+nuclear energy consumption, it's inconvenient but possible to directly compare 
+the pattern pertaining only to fossil fuel energy reduction. You can similarly
+make judgments about the proportion of the bar which is devoted to each different
+kind of energy consumption, but again it is not as clear as in plot 2. Plot 2
+makes it very easy to compare the proportional shrinkage and growth of the different
+types of energy consumption but obscures the total energy consumption per capita.
+
 \
 
 ```{r,echo=FALSE, fig.margin=TRUE,out.width = '100%'}
 knitr::include_graphics("http://faculty.olin.edu/dshuman/DS/energy_decomp_totals.png")
+```
+```{r fig.width=15, fig.height=10, fig.fullwidth=TRUE}
+ggplot(energy_per_capita3, aes(x = factor(year), y = consumption_per_capita, fill = energy_source)) +
+  geom_col(position = "stack") +
+  facet_wrap(~ country, ncol = 9) + 
+  labs(x = "Year", y = "Energy Consumption Per Capita (kWh)", fill = "Energy Source") +
+  scale_fill_manual(values = c(
+    "fossil_fuels" = "red", 
+    "nuclear"      = "yellow",
+    "renewables"   = "green"
+  ))
 ```
 
 
@@ -294,5 +358,16 @@ knitr::include_graphics("http://faculty.olin.edu/dshuman/DS/energy_decomp_totals
 
 ```{r,echo=FALSE, fig.margin=TRUE,out.width = '100%'}
 knitr::include_graphics("http://faculty.olin.edu/dshuman/DS/energy_decomp_portions.png")
+```
+```{r fig.width=15, fig.height=10, fig.fullwidth=TRUE}
+ggplot(energy_per_capita3, aes(x = factor(year), y = consumption_per_capita, fill = energy_source)) +
+  geom_col(position = "fill") +
+  facet_wrap(~ country, ncol = 9) + 
+  labs(x = "Year", y = "Portion of Energy Consumption", fill = "Energy Source") +
+  scale_fill_manual(values = c(
+    "fossil_fuels" = "red", 
+    "nuclear"      = "yellow",
+    "renewables"   = "green"
+  ))
 ```
 
